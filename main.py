@@ -22,7 +22,7 @@ from starlette.responses import JSONResponse
 from fastapi import FastAPI, File, UploadFile
 
 
-if "GOOGLE_CLOUD_PROJECT" in os.environ:
+if "K_REVISION" in os.environ:
     print("Running on Google Cloud")
     model = tf.keras.models.load_model("gs://jetpack-models/cats_and_dogs")
 else:
