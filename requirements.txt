@@ -2,4 +2,5 @@ fastapi==0.103.1
 pydantic==2.3.0
 uvicorn==0.23.2
 python-multipart==0.0.6
+Pillow==9.5.0
 tensorflow-cpu==2.12.0
