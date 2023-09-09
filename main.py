@@ -69,7 +69,8 @@ def predict():
         # ----------------------------------------------------------------
 
         image = Image.open(image_file)
-        image_resized = image.resize((160, 160))
+        image_rgb = image.convert("RGB")
+        image_resized = image_rgb.resize((160, 160))
         image_numpy = np.array(image_resized)
         image_batch = np.expand_dims(image_numpy, axis=0)
 
