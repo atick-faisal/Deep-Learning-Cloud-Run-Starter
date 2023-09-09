@@ -1,4 +1,4 @@
-FROM node:16-slim
+FROM node:16-slim as build
 WORKDIR /app
 COPY . ./
 RUN npm install --prefix client
