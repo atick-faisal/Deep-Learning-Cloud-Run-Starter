@@ -23,6 +23,7 @@ from google.cloud import storage
 from flask import Flask, request, jsonify, send_from_directory
 
 BUCKET_NAME = "jetpack-ai-data"
+STORAGE_NAME = "cats-and-dogs"
 MODEL_NAME = "cats_and_dogs"
 CLASS_NAMES = ["cats", "dogs"]
 IMG_SIZE = (160, 160)
@@ -30,7 +31,7 @@ IMG_SIZE = (160, 160)
 if "K_REVISION" in os.environ:
     print("Running on Google Cloud")
     model = tf.keras.models.load_model(
-        f"gs://{BUCKET_NAME}/{MODEL_NAME}/model/{MODEL_NAME}")
+        f"gs://{BUCKET_NAME}/{STORAGE_NAME}/model/{MODEL_NAME}")
 else:
     print("Running on a local machine")
     model = tf.keras.models.load_model(f"models/{MODEL_NAME}")
@@ -76,7 +77,7 @@ def predict():
         predictions = tf.where(predictions < 0.5, 0, 1)
 
         # ----------------------- Save Image ------------------------------
-        blob = bucket.blob(f"{MODEL_NAME}/images/{str(uuid.uuid4())}.jpg")
+        blob = bucket.blob(f"{STORAGE_NAME}/images/{str(uuid.uuid4())}.jpg")
         image_byte_array = io.BytesIO()
         image.save(image_byte_array, format="JPEG")
         blob.upload_from_string(
