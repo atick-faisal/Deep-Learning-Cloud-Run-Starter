@@ -25,6 +25,7 @@ function App() {
                 console.error("Server Error: ", response.status);
             }
         } catch (error) {
+            setPrediction(error)
             console.error("Error: ", error);
         } finally {
             setLoading(false);

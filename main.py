@@ -62,8 +62,9 @@ def predict():
         image_file = request.files["image"]
 
         allowed_extensions = {"jpg", "jpeg", "png"}
+        image_extension = image_file.filename.split(".")[-1].lower()
         if "." not in image_file.filename or \
-                image_file.filename.split(".")[-1].lower() not in allowed_extensions:
+                image_extension not in allowed_extensions:
             return jsonify({"error": "Invalid image format"}), 400
         # ----------------------------------------------------------------
 
@@ -77,11 +78,19 @@ def predict():
         predictions = tf.where(predictions < 0.5, 0, 1)
 
         # ----------------------- Save Image ------------------------------
-        blob = bucket.blob(f"{STORAGE_NAME}/images/{str(uuid.uuid4())}.jpg")
+        if image_extension == "jpg" or image_extension == "jpeg":
+            format = "JPEG"
+            content_type = "image/jpeg"
+        else:
+            format = "PNG"
+            content_type = "image/png"
+
+        blob = bucket.blob(
+            f"{STORAGE_NAME}/images/{str(uuid.uuid4())}.{image_extension}")
         image_byte_array = io.BytesIO()
-        image.save(image_byte_array, format="JPEG")
+        image.save(image_byte_array, format=format)
         blob.upload_from_string(
-            image_byte_array.getvalue(), content_type="image/jpeg")
+            image_byte_array.getvalue(), content_type=content_type)
         # -----------------------------------------------------------------
 
         response = {
