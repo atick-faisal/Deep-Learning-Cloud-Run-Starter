@@ -18,36 +18,62 @@ import os
 import numpy as np
 from PIL import Image
 import tensorflow as tf
-from starlette.responses import JSONResponse
-from fastapi import FastAPI, File, UploadFile
+from flask import Flask, request, jsonify
 
+
+MODEL_NAME = "cats_and_dogs"
+CLASS_NAMES = ["cats", "dogs"]
+IMG_SIZE = (160, 160)
 
 if "K_REVISION" in os.environ:
     print("Running on Google Cloud")
-    model = tf.keras.models.load_model("gs://jetpack-models/cats_and_dogs")
+    model = tf.keras.models.load_model(f"gs://jetpack-models/{MODEL_NAME}")
 else:
     print("Running on a local machine")
-    model = tf.keras.models.load_model("models/cats_and_dogs")
-
-class_names = ["cats", "dogs"]
-
-app = FastAPI()
+    model = tf.keras.models.load_model(f"models/{MODEL_NAME}")
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+app = Flask(__name__)
 
 
-@app.post("/predict")
-async def predict(file: UploadFile):
-    image = Image.open(io.BytesIO(await file.read()))
-    image = image.resize((160, 160))
-    image = np.array(image)
-    image = np.expand_dims(image, axis=0)
+@app.route("/", methods=["GET"])
+def root():
+    return jsonify({"message": "Hello World"})
 
-    predictions = model.predict_on_batch(image).flatten()
-    predictions = tf.nn.sigmoid(predictions)
-    predictions = tf.where(predictions < 0.5, 0, 1)
 
-    return JSONResponse({"class": class_names[predictions[0]]})
+@app.route("/predict", methods=["POST"])
+def predict():
+    try:
+        # ----------------------- Verify Image ---------------------------
+        if "image" not in request.files:
+            return jsonify({"error": "No image provided"}), 400
+
+        image_file = request.files["image"]
+
+        allowed_extensions = {'jpg', 'jpeg', 'png'}
+        if "." not in image_file.filename or \
+                image_file.filename.split('.')[-1].lower() not in allowed_extensions:
+            return jsonify({"error": "Invalid image format"}), 400
+        # ----------------------------------------------------------------
+
+        image = Image.open(image_file)
+        image = image.resize((160, 160))
+        image = np.array(image)
+        image = np.expand_dims(image, axis=0)
+
+        predictions = model.predict_on_batch(image).flatten()
+        predictions = tf.nn.sigmoid(predictions)
+        predictions = tf.where(predictions < 0.5, 0, 1)
+
+        response = {
+            "class": CLASS_NAMES[predictions[0]]
+        }
+
+        return jsonify(response), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
