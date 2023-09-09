@@ -118,7 +118,10 @@ def predict():
 
         return jsonify(response), 200
 
-    except Exception as error:
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 500
+
+    except OSError as error:
         return jsonify({"error": str(error)}), 500
 
 
