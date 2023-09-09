@@ -1,16 +1,18 @@
-#    Copyright 2023 Atick Faisal
+"""
+    Copyright 2023 Atick Faisal
 
-#    Licensed under the Apache License, Version 2.0 (the "License");
-#    you may not use this file except in compliance with the License.
-#    You may obtain a copy of the License at
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-#        http://www.apache.org/licenses/LICENSE-2.0
+        http://www.apache.org/licenses/LICENSE-2.0
 
-#    Unless required by applicable law or agreed to in writing, software
-#    distributed under the License is distributed on an "AS IS" BASIS,
-#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#    See the License for the specific language governing permissions and
-#    limitations under the License.
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+"""
 
 
 import io
@@ -46,14 +48,30 @@ bucket = storage_client.bucket(BUCKET_NAME)
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve(path):
+    """
+    Serves static files or the index.html file.
+
+    Args:
+        path (str): The path to the file to serve.
+
+    Returns:
+        flask.Response: The response containing the requested file or index.html.
+    """
     if path != "" and os.path.exists(app.static_folder + "/" + path):
         return send_from_directory(app.static_folder, path)
-    else:
-        return send_from_directory(app.static_folder, "index.html")
+    return send_from_directory(app.static_folder, "index.html")
 
 
 @app.route("/predict", methods=["POST"])
 def predict():
+    """
+    Endpoint for image prediction.
+
+    Accepts an image file, processes it, and returns a prediction.
+
+    Returns:
+        flask.Response: A JSON response containing the prediction.
+    """
     try:
         # ----------------------- Verify Image ---------------------------
         if "image" not in request.files:
@@ -79,17 +97,17 @@ def predict():
         predictions = tf.where(predictions < 0.5, 0, 1)
 
         # ----------------------- Save Image ------------------------------
-        if image_extension == "jpg" or image_extension == "jpeg":
-            format = "JPEG"
+        if image_extension in ("jpg", "jpeg"):
+            image_format = "JPEG"
             content_type = "image/jpeg"
         else:
-            format = "PNG"
+            image_format = "PNG"
             content_type = "image/png"
 
         blob = bucket.blob(
             f"{STORAGE_NAME}/images/{str(uuid.uuid4())}.{image_extension}")
         image_byte_array = io.BytesIO()
-        image.save(image_byte_array, format=format)
+        image.save(image_byte_array, format=image_format)
         blob.upload_from_string(
             image_byte_array.getvalue(), content_type=content_type)
         # -----------------------------------------------------------------
@@ -100,12 +118,18 @@ def predict():
 
         return jsonify(response), 200
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except Exception as error:
+        return jsonify({"error": str(error)}), 500
 
 
 @app.route("/health_check", methods=["GET"])
-def root():
+def health_check():
+    """
+    Health check endpoint.
+
+    Returns:
+        flask.Response: A JSON response with a "Hello World" message.
+    """
     return jsonify({"message": "Hello World"})
 
 
