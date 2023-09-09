@@ -68,11 +68,11 @@ def predict():
         # ----------------------------------------------------------------
 
         image = Image.open(image_file)
-        image = image.resize((160, 160))
-        image = np.array(image)
-        image = np.expand_dims(image, axis=0)
+        image_resized = image.resize((160, 160))
+        image_numpy = np.array(image_resized)
+        image_batch = np.expand_dims(image_numpy, axis=0)
 
-        predictions = model.predict_on_batch(image).flatten()
+        predictions = model.predict_on_batch(image_batch).flatten()
         predictions = tf.nn.sigmoid(predictions)
         predictions = tf.where(predictions < 0.5, 0, 1)
 
