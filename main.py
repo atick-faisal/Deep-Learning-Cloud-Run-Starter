@@ -13,26 +13,33 @@
 #    limitations under the License.
 
 
+import io
 import os
+import uuid
 import numpy as np
 from PIL import Image
 import tensorflow as tf
+from google.cloud import storage
 from flask import Flask, request, jsonify, send_from_directory
 
-
+BUCKET_NAME = "jetpack-ai-data"
 MODEL_NAME = "cats_and_dogs"
 CLASS_NAMES = ["cats", "dogs"]
 IMG_SIZE = (160, 160)
 
 if "K_REVISION" in os.environ:
     print("Running on Google Cloud")
-    model = tf.keras.models.load_model(f"gs://jetpack-models/{MODEL_NAME}")
+    model = tf.keras.models.load_model(
+        f"gs://{BUCKET_NAME}/model/{MODEL_NAME}")
 else:
     print("Running on a local machine")
     model = tf.keras.models.load_model(f"models/{MODEL_NAME}")
 
 
 app = Flask(__name__, static_folder="client/dist")
+
+storage_client = storage.Client()
+bucket = storage_client.bucket(BUCKET_NAME)
 
 
 @app.route("/", defaults={"path": ""})
@@ -67,6 +74,14 @@ def predict():
         predictions = model.predict_on_batch(image).flatten()
         predictions = tf.nn.sigmoid(predictions)
         predictions = tf.where(predictions < 0.5, 0, 1)
+
+        # ----------------------- Save Image ------------------------------
+        blob = bucket.blob(f"images/{str(uuid.uuid4())}.jpg")
+        image_byte_array = io.BytesIO()
+        image.save(image_byte_array, format="JPEG")
+        blob.upload_from_string(
+            image_byte_array.getvalue(), content_type="image/jpeg")
+        # -----------------------------------------------------------------
 
         response = {
             "class": CLASS_NAMES[predictions[0]]
