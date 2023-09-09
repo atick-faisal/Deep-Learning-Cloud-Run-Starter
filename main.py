@@ -13,12 +13,11 @@
 #    limitations under the License.
 
 
-import io
 import os
 import numpy as np
 from PIL import Image
 import tensorflow as tf
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 
 
 MODEL_NAME = "cats_and_dogs"
@@ -33,12 +32,16 @@ else:
     model = tf.keras.models.load_model(f"models/{MODEL_NAME}")
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="client/dist")
 
 
-@app.route("/", methods=["GET"])
-def root():
-    return jsonify({"message": "Hello World"})
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def serve(path):
+    if path != "" and os.path.exists(app.static_folder + "/" + path):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, "index.html")
 
 
 @app.route("/predict", methods=["POST"])
@@ -50,9 +53,9 @@ def predict():
 
         image_file = request.files["image"]
 
-        allowed_extensions = {'jpg', 'jpeg', 'png'}
+        allowed_extensions = {"jpg", "jpeg", "png"}
         if "." not in image_file.filename or \
-                image_file.filename.split('.')[-1].lower() not in allowed_extensions:
+                image_file.filename.split(".")[-1].lower() not in allowed_extensions:
             return jsonify({"error": "Invalid image format"}), 400
         # ----------------------------------------------------------------
 
@@ -73,6 +76,11 @@ def predict():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@app.route("/health_check", methods=["GET"])
+def root():
+    return jsonify({"message": "Hello World"})
 
 
 if __name__ == "__main__":
