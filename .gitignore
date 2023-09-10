@@ -159,5 +159,5 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-dataset/*
-models/*
+# Dataset and Model
+cats_and_dogs*
