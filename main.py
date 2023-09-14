@@ -133,7 +133,7 @@ def health_check():
     Returns:
         flask.Response: A JSON response with a "Hello World" message.
     """
-    return jsonify({"message": "Hello World"})
+    return jsonify({"message": "Hi Mom"})
 
 
 if __name__ == "__main__":
