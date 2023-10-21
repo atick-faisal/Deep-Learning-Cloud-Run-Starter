@@ -13,7 +13,7 @@
 #    limitations under the License.
 
 # --------------- Setup Client -----------------
-FROM node:16-slim as build
+FROM node:21-slim as build
 WORKDIR /app
 COPY . ./
 RUN npm install --prefix client
@@ -21,7 +21,7 @@ RUN npm run build --prefix client
 # ----------------------------------------------
 
 # ----------- Setup Flask Backend --------------
-FROM python:3.11-slim
+FROM python:3.12-slim
 ENV PYTHONUNBUFFERED True
 WORKDIR /app
 COPY --from=build /app/ ./
