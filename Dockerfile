@@ -27,5 +27,5 @@ WORKDIR /app
 COPY --from=build /app/ ./
 RUN pip install poetry
 RUN poetry install
-CMD exec poetry run python -m gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 main:app
+CMD exec poetry run gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 main:app
 # -----------------------------------------------
