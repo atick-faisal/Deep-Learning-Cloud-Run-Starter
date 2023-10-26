@@ -29,7 +29,8 @@ WORKDIR /app
 COPY poetry.lock pyproject.toml /app/
 RUN poetry config virtualenvs.create false
 RUN poetry install
-COPY --from=client /client/dist ./client/
 COPY . /app/
+RUN rm -rf ./client
+COPY --from=client /client/dist ./client/
 CMD exec poetry run gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 main:app
 # -----------------------------------------------
