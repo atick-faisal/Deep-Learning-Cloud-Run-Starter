@@ -39,7 +39,7 @@ else:
     model = tf.keras.models.load_model(f"models/{MODEL_NAME}")
 
 
-app = Flask(__name__, static_folder="client/dist")
+app = Flask(__name__, static_folder="client")
 
 storage_client = storage.Client()
 bucket = storage_client.bucket(BUCKET_NAME)

@@ -6,3 +6,6 @@ README.md
 __pycache__
 .pytest_cache
 node_modules
+dataset
+CODE_OF_CONDUCT.md
+LICENSE.md

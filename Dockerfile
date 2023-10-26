@@ -13,20 +13,23 @@
 #    limitations under the License.
 
 # --------------- Setup Client -----------------
-FROM node:21-slim as build
-WORKDIR /app
-COPY . ./
-RUN npm install --prefix client
-RUN npm run build --prefix client
+FROM node:21-slim as client
+WORKDIR /client
+COPY client/package*.json /client/
+RUN npm install
+COPY client/ ./
+RUN npm run build
 # ----------------------------------------------
 
 # ----------- Setup Flask Backend --------------
 FROM python:3.10-slim
 ENV PYTHONUNBUFFERED True
-WORKDIR /app
-COPY --from=build /app/ ./
 RUN pip install poetry
+WORKDIR /app
+COPY poetry.lock pyproject.toml /app/
 RUN poetry config virtualenvs.create false
 RUN poetry install
+COPY --from=client /client/dist ./client/
+COPY . /app/
 CMD exec poetry run gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 main:app
 # -----------------------------------------------
