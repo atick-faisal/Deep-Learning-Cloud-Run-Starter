@@ -26,7 +26,7 @@ ENV PYTHONUNBUFFERED True
 WORKDIR /app
 COPY --from=build /app/ ./
 RUN pip install poetry
+RUN poetry config virtualenvs.create false
 RUN poetry install
-RUN poetry env use system
 CMD exec poetry run gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 main:app
 # -----------------------------------------------
