@@ -5,5 +5,12 @@
     "group:all",
     ":dependencyDashboard",
     "schedule:daily"
+  ],
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["python"],
+      "matchManagers": ["dockerfile", "poetry", "pyenv"],
+      "enabled": false
+    }
   ]
 }
