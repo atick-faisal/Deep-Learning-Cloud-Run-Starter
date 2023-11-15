@@ -18,6 +18,7 @@
 import io
 import os
 import uuid
+import keras
 import numpy as np
 from PIL import Image
 import tensorflow as tf
@@ -32,11 +33,11 @@ IMG_SIZE = (160, 160)
 
 if "K_REVISION" in os.environ:
     print("Running on Google Cloud")
-    model = tf.keras.models.load_model(
+    model = keras.models.load_model(
         f"gs://{BUCKET_NAME}/{STORAGE_NAME}/model/{MODEL_NAME}")
 else:
     print("Running on a local machine")
-    model = tf.keras.models.load_model(f"models/{MODEL_NAME}")
+    model = keras.models.load_model(f"models/{MODEL_NAME}")
 
 
 app = Flask(__name__, static_folder="client")
