@@ -35,6 +35,6 @@ jobs:
         id: deploy
         uses: google-github-actions/deploy-cloudrun@v0
         with:
-          image: ${{ secrets.DOCKER_USERNAME }}/jetpack-ai:latest
+          image: user/jetpack-ai:latest
           region: us-central1
           service: jetpack-ai
