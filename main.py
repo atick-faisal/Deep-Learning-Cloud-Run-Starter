@@ -25,19 +25,20 @@ import tensorflow as tf
 from google.cloud import storage
 from flask import Flask, request, jsonify, send_from_directory
 
-BUCKET_NAME = "model-data"
-STORAGE_NAME = "cats-and-dogs"
+BUCKET_NAME = "jetpack-ai-artifacts"
+STORAGE_NAME = "model-weights"
 MODEL_NAME = "cats_and_dogs"
+VERSION = "1.0.0"
 CLASS_NAMES = ["cats", "dogs"]
 IMG_SIZE = (160, 160)
 
 def load_model():
     """Loads the model from either Google Cloud Storage or locally."""
-    if "K_REVISION" in os.environ:
+    if "K_REVISION" not in os.environ:
         print("Running on Google Cloud. Loading model from GCS...")
         storage_client = storage.Client() 
         bucket = storage_client.bucket(BUCKET_NAME)
-        blob = bucket.blob(f"{STORAGE_NAME}/model/{MODEL_NAME}")
+        blob = bucket.blob(f"{STORAGE_NAME}/{VERSION}/{MODEL_NAME}")
 
         local_model_path = f'/tmp/{MODEL_NAME}'
         blob.download_to_filename(local_model_path)
