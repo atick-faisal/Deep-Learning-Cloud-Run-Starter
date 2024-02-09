@@ -29,12 +29,12 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/jetpack-ai:latest
+          tags: atick/jetpackai:latest
 
       - name: Deploy to Cloud Run
         id: deploy
         uses: google-github-actions/deploy-cloudrun@v0
         with:
-          image: user/jetpack-ai:latest
+          image: atick/jetpackai:latest
           region: us-central1
           service: jetpack-ai
