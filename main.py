@@ -31,19 +31,25 @@ MODEL_NAME = "cats_and_dogs"
 CLASS_NAMES = ["cats", "dogs"]
 IMG_SIZE = (160, 160)
 
-if "K_REVISION" in os.environ:
-    print("Running on Google Cloud")
-    model = keras.models.load_model(
-        f"gs://{BUCKET_NAME}/{STORAGE_NAME}/model/{MODEL_NAME}")
-else:
-    print("Running on a local machine")
-    model = keras.models.load_model(f"models/{MODEL_NAME}")
+def load_model():
+    """Loads the model from either Google Cloud Storage or locally."""
+    if "K_REVISION" in os.environ:
+        print("Running on Google Cloud. Loading model from GCS...")
+        storage_client = storage.Client() 
+        bucket = storage_client.bucket(BUCKET_NAME)
+        blob = bucket.blob(f"{STORAGE_NAME}/model/{MODEL_NAME}")
 
+        local_model_path = f'/tmp/{MODEL_NAME}'
+        blob.download_to_filename(local_model_path)
 
-app = Flask(__name__, static_folder="client")
+        return keras.models.load_model(local_model_path)
+    else:
+        print("Running on a local machine")
+        return keras.models.load_model(f"models/{MODEL_NAME}")
 
-storage_client = storage.Client()
-bucket = storage_client.bucket(BUCKET_NAME)
+model = load_model() 
+
+app = Flask(__name__, static_folder="client/dist")
 
 
 @app.route("/", defaults={"path": ""})

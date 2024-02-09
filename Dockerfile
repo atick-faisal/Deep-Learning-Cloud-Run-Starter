@@ -22,7 +22,7 @@ RUN npm run build
 # ----------------------------------------------
 
 # ----------- Setup Flask Backend --------------
-FROM python:3.10-slim
+FROM python:3.11-slim
 ENV PYTHONUNBUFFERED True
 RUN pip install poetry
 WORKDIR /app
@@ -31,6 +31,6 @@ RUN poetry config virtualenvs.create false
 RUN poetry install
 COPY . /app/
 RUN rm -rf ./client
-COPY --from=client /client/dist ./client/
+COPY --from=client /client/dist ./client/dist
 CMD exec poetry run gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 main:app
 # -----------------------------------------------
