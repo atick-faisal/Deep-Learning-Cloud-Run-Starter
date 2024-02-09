@@ -38,3 +38,5 @@ jobs:
           image: ${{ secrets.DOCKER_USERNAME }}/jetpackai:latest
           region: us-central1
           service: jetpack-ai
+          memory: 1Gi
+          max-instances: 1
