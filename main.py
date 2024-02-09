@@ -25,7 +25,7 @@ import tensorflow as tf
 from google.cloud import storage
 from flask import Flask, request, jsonify, send_from_directory
 
-BUCKET_NAME = "jetpack-ai-data"
+BUCKET_NAME = "model-data"
 STORAGE_NAME = "cats-and-dogs"
 MODEL_NAME = "cats_and_dogs"
 CLASS_NAMES = ["cats", "dogs"]
